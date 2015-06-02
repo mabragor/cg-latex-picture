@@ -1,5 +1,6 @@
 ;;;; package.lisp
 
 (defpackage #:cg-latex-picture
-  (:use #:cl #:cg-common-ground))
+  (:use #:cl #:cg-common-ground)
+  (:export #:textgen))
 
