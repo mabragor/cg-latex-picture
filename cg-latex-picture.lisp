@@ -25,7 +25,10 @@
 (defparameter *textgens* (make-hash-table :test #'equal))
 
 (defun textgen (x)
-  (cond ((consp x) (funcall (gethash (string (car x)) *textgens*) x))
+  (cond ((consp x)
+	 (if (symbolp (car x))
+	     (funcall (gethash (string (car x)) *textgens*) x)
+	     (joinl "~%" (mapcar #'textgen x))))
 	((stringp x) x)
 	((symbolp x) (stringify-symbol x))
 	(t (error "Don't know how to generate text for this: ~a" x))))
@@ -79,3 +82,24 @@
 
 (define-textgen oval (w h &rest tblr)
   #?"\\oval($(w), $(h))$((tblr-textgen tblr))")
+
+(define-textgen newsavebox (name)
+  #?"\\newsavebox{\\$((textgen name))}")
+
+(define-textgen savebox (name width height (&rest position) &rest content)
+  (let ((text-content (joinl "~%  " (mapcar #'textgen content))))
+    #?"\\savebox{\\$((textgen name))}($(width), $(height))$((tblr-textgen position)){\n  $(text-content)}"))
+
+(define-textgen usebox (name)
+  #?"\\usebox{\\$((textgen name))}")
+
+(define-textgen qbezier (x1 y1 x y x2 y2)
+  #?"\\qbezier($(x1), $(y1))($(x), $(y))($(x2), $(y2))")
+
+(define-textgen picture ((x y) (&rest x0y0) &rest subforms)
+  (let ((text-subforms (joinl "~%  " (mapcar #'textgen subforms))))
+    (join "~%"
+	  #?"\\begin{picture}($(x), $(y))$((if (not x0y0) "" #?"($((car x0y0)), $((cadr x0y0)))"))"
+	  #?"  $(text-subforms)"
+	  #?"\\end{picture}")))
+

@@ -24,3 +24,13 @@
   (is (equal "\\multiput(X, Y)(DX, DY){N}{object}" (textgen '(multiput x y dx dy n object))))
   (is (equal "\\oval(W, H)" (textgen '(oval w h))))
   (is (equal "\\oval(W, H)[tblr]" (textgen '(oval w h :top :bottom :l :r)))))
+
+(test composite
+  (is (equal #?"\\begin{picture}(X, Y)\n  content\n\\end{picture}"
+	     (textgen '(picture (x y) () content))))
+  (is (equal #?"\\begin{picture}(X, Y)(X0, Y0)\n  content\n\\end{picture}"
+	     (textgen '(picture (x y) (x0 y0) content))))
+  (is (equal #?"\\thicklines\n\\thinlines\n\\thicklines"
+	     (textgen '((thicklines) (thinlines) (thicklines))))))
+  
+  
