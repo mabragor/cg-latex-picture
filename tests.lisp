@@ -20,4 +20,7 @@
       (error "Tests failed."))))
 
 (test basic
-  (is (equal "\\put(1, 2){asdf}" (textgen '(put 1 2 "asdf")))))
+  (is (equal "\\put(1, 2){asdf}" (textgen '(put 1 2 "asdf"))))
+  (is (equal "\\multiput(X, Y)(DX, DY){N}{object}" (textgen '(multiput x y dx dy n object))))
+  (is (equal "\\oval(W, H)" (textgen '(oval w h))))
+  (is (equal "\\oval(W, H)[tblr]" (textgen '(oval w h :top :bottom :l :r)))))

@@ -5,7 +5,7 @@
   :author "Alexandr Popolitov <popolit@gmail.com>"
   :license "MIT"
   :serial t
-  :depends-on (#:cg-common-ground #:cl-interpol)
+  :depends-on (#:cg-common-ground #:cl-interpol #:iterate)
   :components ((:file "package")
                (:file "cg-latex-picture")))
 

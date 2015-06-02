@@ -27,17 +27,55 @@
 (defun textgen (x)
   (cond ((consp x) (funcall (gethash (string (car x)) *textgens*) x))
 	((stringp x) x)
+	((symbolp x) (stringify-symbol x))
 	(t (error "Don't know how to generate text for this: ~a" x))))
 
-(defmacro define-textgen (name &body body)
+(defmacro define-textgen (name args &body body)
   (let ((fun-name (intern #?"$((string name))-TEXTGEN")))
     `(eval-when (:compile-toplevel :load-toplevel :execute)
-       (progn (defun ,fun-name (x)
-		,@body)
+       (progn (defun ,fun-name (form)
+		(destructuring-bind ,args (cdr form)
+		  ,@body))
 	      (setf (gethash ,(string name) *textgens*) #',fun-name)))))
 
-;; put
+(define-textgen put (x y obj)
+  #?"\\put($(x), $(y)){$((textgen obj))}")
 
-(define-textgen put 
-  (destructuring-bind (x y obj) (cdr x)
-    #?"\\put($(x), $(y)){$((textgen obj))}"))
+(define-textgen multiput (x y dx dy n obj)
+  #?"\\multiput($(x), $(y))($(dx), $(dy)){$(n)}{$((textgen obj))}")
+
+;; For now we perform no checking on the arguments (this assumed to be handled already by the higher levels)
+(define-textgen line (x y length)
+  #?"\\line($(x), $(y)){$(length)}")
+
+(define-textgen vector (x y length)
+  #?"\\vector($(x), $(y)){$(length)}")
+
+(define-textgen circle (diameter)
+  #?"\\circle{$(diameter)}")
+
+(define-textgen disk (diameter)
+  #?"\\circle*{$(diameter)}")
+
+(define-textgen line-thickness (dimen)
+  #?"\\linethickness{$((textgen dimen))}")
+
+(define-textgen thicklines ()
+  #?"\\thicklines")
+(define-textgen thinlines ()
+  #?"\\thinlines")
+
+(defun tblr-textgen (lst)
+  (if lst
+      (let ((it (with-output-to-string (stream)
+		  (iter (for elt in lst)
+			(cond ((or (eq elt :top) (eq elt :t)) (format stream "t"))
+			      ((or (eq elt :bottom) (eq elt :b)) (format stream "b"))
+			      ((or (eq elt :left) (eq elt :l)) (format stream "l"))
+			      ((or (eq elt :right) (eq elt :r)) (format stream "r")))))))
+	#?"[$(it)]")
+      ""))
+
+
+(define-textgen oval (w h &rest tblr)
+  #?"\\oval($(w), $(h))$((tblr-textgen tblr))")
