@@ -103,3 +103,11 @@
 	  #?"  $(text-subforms)"
 	  #?"\\end{picture}")))
 
+;; OK, now I have the lowest level possible -- I can write in lispy way put commands
+;; What's next?
+
+(defmacro with-lapic-function-transformer (&body body)
+  `(let ((*function-transformer* (lambda (form)
+				   ...)))
+     ,@body))
+
